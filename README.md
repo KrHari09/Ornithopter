@@ -109,3 +109,41 @@ The ornithopter uses a **compound gear train** to translate the rotary motion of
 
 ---
 
+##  Circuit Design & Wiring
+
+### Power Architecture
+
+>  **Critical:** NEVER power servos or the motor directly from the Arduino's 5V pin. Always use the ESC's built-in BEC (Battery Eliminator Circuit) for the 5V rail.
+
+<img width="1452" height="1160" alt="image" src="https://github.com/user-attachments/assets/fb196ac8-c9bc-47dc-b7ff-f1ecb83f7541" />
+
+### Pin Wiring Table
+
+| Component | Wire / Pin | Arduino Nano Pin |
+|---|---|---|
+| **MPU6050** | VCC | 5V (from BEC) |
+| **MPU6050** | GND | GND |
+| **MPU6050** | SDA | A4 |
+| **MPU6050** | SCL | A5 |
+| **RC Receiver CH3** | Throttle Signal | D2 (PWM Input) |
+| **RC Receiver CH1** | Yaw Signal | D3 (PWM Input) |
+| **RC Receiver CH2** | Pitch Signal | D4 (PWM Input) |
+| **ESC Signal** | PWM Input | D9 (PWM Output) |
+| **Servo 1 (Elevator)** | Signal | D10 (PWM Output) |
+| **Servo 2 (Rudder)** | Signal | D11 (PWM Output) |
+
+### RC Stick Mapping (Mode 2 — Default)
+
+| Stick | Axis | Function | Maps To |
+|---|---|---|---|
+| Left Stick | Up/Down | Throttle | Flapping speed (ESC) |
+| Left Stick | Left/Right | Yaw | Rudder servo |
+| Right Stick | Up/Down | Pitch | Elevator servo (+ PID setpoint) |
+| Right Stick | Left/Right | Roll | (Passive — wing geometry) |
+
+---
+
+
+
+
+
