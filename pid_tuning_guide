@@ -1,0 +1,99 @@
+# PID Tuning Guide
+
+## Understanding PID for Ornithopters
+
+The PID controller keeps your ornithopter at the pilot's commanded pitch angle by adjusting the elevator (tail) servo automatically.
+
+```v
+                RC Stick (Setpoint)
+                        │
+                        ▼
+                   [  Error  ] ◄──── MPU6050 (Actual Pitch)
+                        │
+          ┌─────────────┼─────────────┐
+          ▼             ▼             ▼
+        Kp × e      Ki × ∫e dt    Kd × de/dt
+          │             │             │
+          └─────────────┴─────────────┘
+                        │
+                    PID Output
+                        │
+                        ▼
+               Elevator Servo Angle
+```
+
+## Step-by-Step Tuning Procedure
+
+### Phase 0: Preparation (Before any tuning)
+1. Mount MPU6050 on foam tape — reduces flapping vibration.
+2. Upload `flight_controller_pid.ino` with default values (`Kp=0, Ki=0, Kd=0`).
+3. Open **Serial Plotter** (Tools → Serial Plotter) in Arduino IDE.
+4. You should see Target, Actual, Error, and PID Output lines.
+
+### Phase 1: Tune Kp (Proportional)
+Start: `Kp = 0.5, Ki = 0, Kd = 0`
+
+1. Hold the ornithopter in your hand (do NOT fly yet).
+2. Tilt it by ~15° and observe how the elevator servo responds.
+3. Increase Kp slowly until the servo reacts firmly and quickly.
+4. Keep increasing until the pitch starts **oscillating** (bouncing back and forth).
+5. Back off Kp to about **70% of the oscillation value**.
+
+**Good sign:** Servo moves decisively in the corrective direction.  
+**Bad sign (too high):** Pitch oscillates continuously.
+
+### Phase 2: Tune Kd (Derivative — Add before Ki)
+With Kp set, start `Kd = 0.1`, `Ki = 0`
+
+1. Apply a sudden pitch disturbance by hand.
+2. Increase Kd gradually until oscillations damp out quickly.
+3. Too much Kd makes the system **sluggish** and unresponsive to fast movements.
+
+**Good sign:** Returns to level quickly without bouncing.  
+**Bad sign (too high):** Servo twitches with high-frequency noise.
+
+### Phase 3: Tune Ki (Integral — Add last)
+With Kp and Kd set, start `Ki = 0.01`
+
+1. Set the ornithopter down on a tilted surface and observe if it holds a constant offset error.
+2. Ki will slowly eliminate this persistent error.
+3. Increase Ki very slowly — it is the most sensitive gain.
+4. Too much Ki causes **integrator windup** — a slow, growing oscillation.
+
+**Good sign:** Persistent trim offset disappears over 2–3 seconds.  
+**Bad sign (too high):** Slow oscillation that keeps growing.
+
+## Suggested Starting Values
+
+| Aircraft Characteristic | Kp | Ki | Kd |
+|---|---|---|---|
+| Very light (< 80g) | 0.8 | 0.03 | 0.3 |
+| Medium (80–120g) | 1.2 | 0.05 | 0.5 |
+| Heavy (> 120g) | 1.6 | 0.07 | 0.7 |
+
+## Symptom → Fix Table
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Slow response to tilt | Kp too low | Increase Kp |
+| Oscillates continuously | Kp too high | Decrease Kp, increase Kd |
+| Constant tilt offset | Ki too low | Increase Ki |
+| Slow growing oscillation | Ki too high | Decrease Ki |
+| High-frequency servo twitching | Kd too high or vibration | Decrease Kd, improve IMU mounting |
+| Overcorrects then bounces | Kd too low | Increase Kd |
+| No response at all | Gains at zero, wrong pins | Check pin mapping and wiring |
+
+## Anti-Windup Explained
+
+The code clamps `integral` to ±20:
+```cpp
+integral = constrain(integral, -20, 20);
+```
+Without this, if the ornithopter is stuck in a large error for a long time (e.g., during takeoff or after a crash recovery), the integral term builds up to a huge value and causes violent overcorrection when the error finally reduces. The clamp prevents this.
+
+## Real Flight Tuning Tips
+
+1. **First flights: disable Ki** — Set Ki = 0 for initial flights. Trim the ornithopter with Ki first, then enable.
+2. **Throttle affects gains** — At higher throttle, the ornithopter responds faster; you may need to reduce Kp slightly at full throttle.
+3. **Wind conditions** — If flying outdoors, increase Kd to handle wind gusts more aggressively.
+4. **Use Serial Plotter** — The most valuable tuning tool. Watch the Actual line track the Target line in real time.
