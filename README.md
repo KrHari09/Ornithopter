@@ -471,6 +471,75 @@ The graph below shows pitch angle (°) over a 3-second flight segment including 
 
 ---
 
+##  How to Build
+
+### Prerequisites
+
+- Arduino IDE 2.x
+- Libraries: `Servo.h` (built-in), `Wire.h` (built-in)
+- FlySky FS-i6 transmitter bound to FS-iA6 receiver
+
+### Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/KrHari09/RC-Ornithopter-Flight-Stabilization-Telemetry-System.git
+   ```
+
+2. **Open the firmware**
+   - Open `src/flight_controller_pid.ino` in Arduino IDE
+
+3. **Upload to Arduino Nano**
+   - Board: `Arduino Nano`
+   - Processor: `ATmega328P (Old Bootloader)` ← required for clone boards
+   - Port: select your COM port
+
+4. **Calibrate ESC**
+   - Power on with throttle at max → wait for beep sequence
+   - Lower throttle to minimum → wait for arming beep
+   - The `delay(2000)` in `setup()` handles this
+
+5. **Bind RC Receiver**
+   - Follow FlySky FS-iA6 binding procedure
+   - Verify CH1/CH2/CH3 PWM signals on Serial Monitor (should read ~1500 µs at center)
+
+6. **Tune PID on bench**
+   - Hold ornithopter, apply manual pitch disturbances
+   - Watch Serial Monitor for pitch angle and PID output
+   - Adjust `Kp`, `Ki`, `Kd` using the tuning table above
+
+7. **Flight test in open area**
+   - Start at ~30% throttle
+   - Verify elevator responds to RC pitch input
+   - Verify PID corrects unintended pitch changes
+
+---
+
+##  References
+
+1. Chronister, N. (1999). *The Ornithopter Design Manual*. The Ornithopter Zone.
+2. Mueller, T. J. (2001). *Fixed and Flapping Wing Aerodynamics for Micro Air Vehicle Applications*. AIAA. ISBN 1-56347-517-0.
+3. Azuma, A. (2006). *The Biokinetics of Flying and Swimming* (2nd ed.). AIAA. ISBN 1-56347-781-5.
+4. DeLaurier, J. D. (1999). The Development and Testing of a Full-Scale Piloted Ornithopter. *Canadian Aeronautics and Space Journal*, 45(2), 72–82.
+5. Warrick, D., Tobalske, B., Powers, D., & Dickinson, M. (2010). The Aerodynamics of Hummingbird Flight. AIAA.
+6. Nagakiran, M., Kannakumar, J., & Salmon, A. (2019). Construction and Operation of Ornithopter Using RC. *JETIR*, Vol. 6, Issue 1. ISSN-2349-5162.
+
+---
+
+##  Author
+
+**Hari Kumar**  
+B.Tech, Electronics and Communication Engineering, NIT Jamshedpur
+
+[![GitHub](https://img.shields.io/badge/GitHub-KrHari09-181717?style=flat-square&logo=github)](https://github.com/KrHari09)
+
+---
+
+<div align="center">
+
+*Built with  electronics,  control theory, and  a love for bio-inspired flight.*
+
+</div>
 
 
 
